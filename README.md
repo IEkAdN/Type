@@ -23,3 +23,12 @@ Homology and coverage are output to the standard output as TSV. An example of th
 |  Stx2d_AF500189.1  |  0.9996  |  0.840451  |  0.871072  |
 
 *`Type` calculates homology and coverage (the 3rd column) considering only top hit reads. However, as supplementary information, it also calculates coverage (the 4th columns) considering all hit reads.
+
+## Installation
+If you cannot run the Linux binary `Type` in this repository, you can compile `Type` as follows:
+
+```
+git clone https://github.com/IEkAdN/Type.git
+cd Type/
+make
+```
