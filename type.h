@@ -1,15 +1,15 @@
-#ifndef FUGA_H_
-#define FUGA_H_
+#ifndef TYPE_H_
+#define TYPE_H_
 
 #include "split.h"
 #include "alignment.h"
 
-class Fuga {
+class Type {
  public:
-  Fuga(string R1SamNom, string R2SamNom, string RefFaNom)
+  Type(string R1SamNom, string R2SamNom, string RefFaNom)
       : kR1SamNom_(R1SamNom), kR2SamNom_(R2SamNom), kRefFaNom_(RefFaNom),
         kJudgeFrameshift_(0), kIndelRate_(0) {}
-  ~Fuga() {}
+  ~Type() {}
   void Main();
   const string kR1SamNom_;
   const string kR2SamNom_;
@@ -38,4 +38,4 @@ class Fuga {
   map<double, vector<string>, greater<double> > RefScore_;
 };
 
-#endif  // FUGA_H_
+#endif  // TYPE_H_

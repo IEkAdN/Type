@@ -1,5 +1,5 @@
-#ifndef HOGE_H_
-#define HOGE_H_
+#ifndef SPLIT_H_
+#define SPLIT_H_
 
 #include <algorithm>
 #include <cctype>
@@ -56,4 +56,4 @@ void split(vector<string>& s_sp, const string& s, const string& delim,
 void split_2(vector<string>& s_sp, const string& s, const string& delim,
            bool token_compress = false);
 
-#endif  // HOGE_H_
+#endif  // SPLIT_H_

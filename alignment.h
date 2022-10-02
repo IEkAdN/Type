@@ -1,5 +1,5 @@
-#ifndef LIB_H_
-#define LIB_H_
+#ifndef ALIGNMENT_H_
+#define ALIGNMENT_H_
 
 #include "split.h"
 
@@ -102,7 +102,7 @@ class ReadPosInfo {
   void EditRefIns(const string& RefId, u32 RefPos) { RefIns_[RefId].insert(RefPos); }
   void EditAllRefMatch(const string& RefId, u32 RefPos) { AllRefMatch_[RefId].insert(RefPos); }
   void EditAllRefIns(const string& RefId, u32 RefPos) { AllRefIns_[RefId].insert(RefPos); }
-  // edit Fuga::RefInfoM_
+  // edit Type::RefInfoM_
   void EditRefInfoM(unordered_map<string, RefInfo>* RefInfoM);
   void ParseRefMatch(unordered_map<string, RefInfo>* RefInfoM);
   void ParseRefDel(unordered_map<string, RefInfo>* RefInfoM);
@@ -117,7 +117,7 @@ class ReadPosInfo {
   // sometimes there are multiple top hits for one read pos
   // AllRefMatch_, AllRefIns_ are set considering all hits
   // these variables stores corresponding ref pos, because they are set to edit
-  // Fuga::RefInfoM_
+  // Type::RefInfoM_
 
   // {top hit ref ID: set<top hit ref pos>}
   unordered_map<string, unordered_set<u32> > RefMatch_;
@@ -143,7 +143,7 @@ class SamL {
            As_(0), Iden_(0) {}
   ~SamL() {}
   void ReadL(const string& L, const vector<string>& LSp);
-  // edit Fuga::EditRefInfoM()::ReadInfo
+  // edit Type::EditRefInfoM()::ReadInfo
   void EditReadInfo(vector<ReadPosInfo>* ReadInfo) const;
   u32 Flag() const { return Flag_; }
   u32 LeftRefPos() const { return LeftRefPos_; }
@@ -169,4 +169,4 @@ class SamL {
   double Iden_;
 };
 
-#endif  // LIB_H_
+#endif  // ALIGNMENT_H_

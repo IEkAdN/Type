@@ -1,6 +1,6 @@
 #include "type.h"
 
-void Fuga::Main() {
+void Type::Main() {
   ReadRef();
   ReadSam(kR1SamNom_, &R1Sam_);
   ReadSam(kR2SamNom_, &R2Sam_);
@@ -12,7 +12,7 @@ void Fuga::Main() {
 }
 
 // initialize object storing ref info
-void Fuga::ReadRef() {
+void Type::ReadRef() {
   ifstream F(kRefFaNom_);
   string L;
   string Id;
@@ -39,7 +39,7 @@ void Fuga::ReadRef() {
 }
 
 // parse and store alignment info for each line in SAM
-void Fuga::ReadSam(string FNom, unordered_map<string, vector<SamL> >* Sam) {
+void Type::ReadSam(string FNom, unordered_map<string, vector<SamL> >* Sam) {
   ifstream F(FNom);
   string L;
   while (getline(F, L)) {
@@ -54,7 +54,7 @@ void Fuga::ReadSam(string FNom, unordered_map<string, vector<SamL> >* Sam) {
 }
 
 // link ref pos and mapped read pos
-void Fuga::EditRefInfoM(unordered_map<string, vector<SamL> >* Sam) {
+void Type::EditRefInfoM(unordered_map<string, vector<SamL> >* Sam) {
   // for each read ID
   for (auto i = Sam->begin(); i != Sam->end(); ++i) {
     const vector<SamL>& SamLV(i->second);
@@ -76,7 +76,7 @@ void Fuga::EditRefInfoM(unordered_map<string, vector<SamL> >* Sam) {
 }
 
 // calculate average identity and coverage for each ref ID
-void Fuga::SummarizeRefInfo() {
+void Type::SummarizeRefInfo() {
   // for each ref ID
   for (auto i = RefInfoM_.begin(); i != RefInfoM_.end(); ++i) {
     RefInfo* Info(&i->second);
@@ -90,7 +90,7 @@ void Fuga::SummarizeRefInfo() {
 }
 
 // calculate score for each ref ID to sort ref IDs by it
-void Fuga::SetRefScore() {
+void Type::SetRefScore() {
   // for each ref ID
   for (auto i = RefInfoM_.begin(); i != RefInfoM_.end(); ++i) {
     string Id(i->first);
@@ -101,7 +101,7 @@ void Fuga::SetRefScore() {
 }
 
 // print identity and coverage for each ref ID
-void Fuga::PrintHit() {
+void Type::PrintHit() {
   for (auto i = RefScore_.begin(); i != RefScore_.end(); ++i) {
     const vector<string>& IdV(i->second);
     for (auto j = IdV.begin(); j != IdV.end(); ++j) {
