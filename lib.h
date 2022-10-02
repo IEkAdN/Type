@@ -3,7 +3,7 @@
 
 #include "hoge.h"
 
-// 各ref posに対しRefPosInfo型のobject 1つが対応
+// each ref pos has one RefPosInfo object
 class RefPosInfo {
  public:
   RefPosInfo() : AvgIden_(0), Ins_(0), Dp_(0), AllDp_(0), Pos_(0) {}
@@ -23,19 +23,20 @@ class RefPosInfo {
   u32 Pos() const { return Pos_; }
 
  private:
-  // [当該ref posへのtop hitのiden]
-  // あるtop hitにより当該posの欠失が支持されている場合も含む
+  // vector<identity b/w the pos and each top hit read>
+  // appended even if the read supports ref deletion at the pos
   vector<double> Iden_;
   double AvgIden_;
-  // ref側での挿入を支持するtop hitの数
+  // number of top hit reads supporting ref insertion
+  // for experimental function
   u32 Ins_;
-  // {当該ref posと当該ref pos + 1の間にあるref側の欠失塩基数,
-  //  その欠失を支持するtop hitの数}
+  // {ref deletion length: number of top hit reads supporting it}
+  // for experimental function
   unordered_map<u32, u32> Del_;
-  // top hitによるcoverage depth
-  // あるtop hitにより当該posの欠失が支持されている場合もカウント
+  // coverage depth of top hit reads
+  // counted up even if a read supports ref deletion at the pos
   u32 Dp_;
-  // 全hitによるcoverage depth
+  // coverage depth of all hit reads
   u32 AllDp_;
   u32 Pos_;
 };
@@ -51,63 +52,58 @@ class RefInfo {
   void EditPosIns(u32 Pos) { PosInfo_.at(Pos).EditIns(); }
   void EditPosDp(u32 Pos) { PosInfo_.at(Pos).EditDp(); }
   void EditPosAllDp(u32 Pos) { PosInfo_.at(Pos).EditAllDp(); }
-  // 各refへのtop hit readを出力したい場合用
-  // void EditTopHitReadId(string ReadId) { TopHitReadId_.insert(ReadId); }
-  // void PrintTopHitReadId() { for (auto i = TopHitReadId_.begin(); i != TopHitReadId_.end(); ++i) { cout << *i << "\n"; } }
   void SummarizeInfo();
+  // never called (experimental function)
   void SetHasFrameshift();
   double Iden() const { return Iden_; }
   double Cov() const { return Cov_; }
   double AllCov() const { return AllCov_; }
   double Dp() const { return Dp_; }
+  // never called (experimental function)
   bool HasFrameshift() const { return HasFrameshift_; }
+  // never called (experimental function)
   string Frameshift() const { return Frameshift_; }
+  // never used (for experimental function)
   const double kIndelRate_;
 
  private:
-  // alignmentがまたげる程度の長さのref側欠失(CIGARがIになる)による
-  // frameshiftがあるか
+  // whether there are frameshifts due to short deletions
+  // never called (experimental function)
   bool HasShortDelFrameshift();
-  // alignmentがまたげる程度の長さのref側挿入(CIGARがDになる)による
-  // frameshiftがあるか
+  // whether there are frameshifts due to short insertions
+  // never called (experimental function)
   bool HasShortInsFrameshift();
-  // alignmentがまたげない程度の長さのref側挿入(CIGARがSになる)による
-  // frameshiftがあるか
+  // whether there are frameshifts due to long insertions
+  // never called (experimental function)
   bool HasLongInsFrameshift();
-  // alignmentがまたげない程度の長さのref側欠失(CIGARがSになる)による
-  // frameshiftがあるかは判定困難(挿入の長さがSの長さ以上になる可能性があるため)
 
   vector<RefPosInfo> PosInfo_;
-  // 各refへのtop hit readを出力したい場合用
-  // unordered_set<string> TopHitReadId_;
-  // top hitのidentityの平均の平均(RefPosInfo::AvgIden_の全pos平均)
+  // average of RefPosInfo::AvgIden_ in region covered by top hit reads
   double Iden_;
-  // top hitによるカバー率
+  // ratio of region covered by top hit reads
   double Cov_;
-  // 全hitによるカバー率
+  // ratio of region covered by all hit reads
   double AllCov_;
-  // top hitによるcoverage depthの平均
+  // average coverage depth of top hit reads
   double Dp_;
   bool HasFrameshift_;
   string Frameshift_;
 };
 
-// 各read posに対しReadPosInfo型のobject 1つが対応
+// each read pos has one ReadPosInfo object
 class ReadPosInfo {
  public:
   ReadPosInfo() : As_(0), Iden_(0) {}
   ~ReadPosInfo() {}
-  // RefMatch_, RefDel_, RefIns_を初期化, As_, Iden_を更新
+  // initialize RefMatch_, RefDel_, RefIns_, and update As_, Iden_
   void InitTopHitInfo(u32 As, double Iden, const string& RefId);
   void EditRefMatch(const string& RefId, u32 RefPos) { RefMatch_[RefId].insert(RefPos); }
   void EditRefDel(const string& RefId, u32 RefPos) { ++RefDel_[RefId][RefPos]; }
   void EditRefIns(const string& RefId, u32 RefPos) { RefIns_[RefId].insert(RefPos); }
   void EditAllRefMatch(const string& RefId, u32 RefPos) { AllRefMatch_[RefId].insert(RefPos); }
   void EditAllRefIns(const string& RefId, u32 RefPos) { AllRefIns_[RefId].insert(RefPos); }
-  // Fuga::RefInfoM_を編集
+  // edit Fuga::RefInfoM_
   void EditRefInfoM(unordered_map<string, RefInfo>* RefInfoM);
-  // 各refへのtop hit readを出力したい場合用
-  // void EditRefInfoM(unordered_map<string, RefInfo>* RefInfoM, const string& ReadId);
   void ParseRefMatch(unordered_map<string, RefInfo>* RefInfoM);
   void ParseRefDel(unordered_map<string, RefInfo>* RefInfoM);
   void ParseRefIns(unordered_map<string, RefInfo>* RefInfoM);
@@ -116,31 +112,30 @@ class ReadPosInfo {
   u32 As() const { return As_; }
 
  private:
-  // RefMatch_, RefDel_, RefIns_, As_, Iden_にはtop hit
-  // (AS基準, 複数の可能性あり)の情報を記憶
-  // AllRefMatch_, AllRefIns_には全hitの情報を記憶
-  // Fuga::RefInfoM_の編集が目的なのでref posを基準に記憶
+  // RefMatch_, RefDel_, RefIns_, As_, Iden_ are set considering only top hits
+  // top hits are judged based on BWA's AS tag
+  // sometimes there are multiple top hits for one read pos
+  // AllRefMatch_, AllRefIns_ are set considering all hits
+  // these variables stores corresponding ref pos, because they are set to edit
+  // Fuga::RefInfoM_
 
-  // {top hit ref ID, [top hit ref pos]}
-  // split alignmentにより1 readの複数alignmentが同じマッチを支持している場合に
-  // ダブルカウントしないようにvectorではなくunordered_set
+  // {top hit ref ID: set<top hit ref pos>}
   unordered_map<string, unordered_set<u32> > RefMatch_;
-  // {top hit ref ID, {top hit ref pos, そのref posの右側に何文字欠失があるか}
+  // {top hit ref ID, {top hit ref pos, ref deletion length on the right of it}
   unordered_map<string, unordered_map<u32, u32> > RefDel_;
-  // {top hit ref ID, [ref側で欠失しているtop hit ref pos]}
-  // split alignmentにより1 readの複数alignmentが同じ欠失を支持している場合に
-  // ダブルカウントしないようにvectorではなくunordered_set
+  // {top hit ref ID: set<top hit ref pos deleted>]}
   unordered_map<string, unordered_set<u32> > RefIns_;
-  // RefMatch_のtop hitに限定しないversion
+  // same as RefMatch_, but considering all hit reads, not only top hit reads
   unordered_map<string, unordered_set<u32> > AllRefMatch_;
-  // RefIns_のtop hitに限定しないversion
+  // same as RefIns_, but considering all hit reads, not only top hit reads
   unordered_map<string, unordered_set<u32> > AllRefIns_;
-  // top hitのAS
+  // BWA's AS tag of top hit
   u32 As_;
-  // top hitのidentity
+  // identity of top hit
   double Iden_;
 };
 
+// each alignment info is stored in one SamL (SAM line) object
 class SamL {
  public:
   SamL() : Flag_(0), LeftRefPos_(0), RightRefPos_(0), ReadLen_(0),
@@ -148,7 +143,7 @@ class SamL {
            As_(0), Iden_(0) {}
   ~SamL() {}
   void ReadL(const string& L, const vector<string>& LSp);
-  // Fuga::EditRefInfoM()::ReadInfoを編集
+  // edit Fuga::EditRefInfoM()::ReadInfo
   void EditReadInfo(vector<ReadPosInfo>* ReadInfo) const;
   u32 Flag() const { return Flag_; }
   u32 LeftRefPos() const { return LeftRefPos_; }

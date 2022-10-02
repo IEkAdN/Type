@@ -11,6 +11,7 @@ void Fuga::Main() {
   PrintHit();
 }
 
+// initialize object storing ref info
 void Fuga::ReadRef() {
   ifstream F(kRefFaNom_);
   string L;
@@ -37,6 +38,7 @@ void Fuga::ReadRef() {
   RefInfoM_.at(Id).Resize(SeqLen);
 }
 
+// parse and store alignment info for each line in SAM
 void Fuga::ReadSam(string FNom, unordered_map<string, vector<SamL> >* Sam) {
   ifstream F(FNom);
   string L;
@@ -51,42 +53,54 @@ void Fuga::ReadSam(string FNom, unordered_map<string, vector<SamL> >* Sam) {
   }
 }
 
+// link ref pos and mapped read pos
 void Fuga::EditRefInfoM(unordered_map<string, vector<SamL> >* Sam) {
+  // for each read ID
   for (auto i = Sam->begin(); i != Sam->end(); ++i) {
-    // 各refへのtop hit readを出力したい場合用
-    // const string& ReadId(i->first);
     const vector<SamL>& SamLV(i->second);
     u32 ReadLen(SamLV.begin()->ReadLen());
     vector<ReadPosInfo> ReadInfo(ReadLen);
+    // for each alignment
     for (auto j = SamLV.begin(); j != SamLV.end(); ++j) {
+      // edit info of each read position
+      // ex) corresponding ref position
       j->EditReadInfo(&ReadInfo);
     }
+    // for each read pos j
     for (auto j = ReadInfo.begin(); j != ReadInfo.end(); ++j) {
+      // edit info of each ref position corresponding to j
+      // ex) identity of the alignment, coverage depth
       j->EditRefInfoM(&RefInfoM_);
-      // 各refへのtop hit readを出力したい場合用
-      // j->EditRefInfoM(&RefInfoM_, ReadId);
     }
   }
 }
 
+// calculate average identity and coverage for each ref ID
 void Fuga::SummarizeRefInfo() {
+  // for each ref ID
   for (auto i = RefInfoM_.begin(); i != RefInfoM_.end(); ++i) {
     RefInfo* Info(&i->second);
+    // calculate average identity and coverage
     Info->SummarizeInfo();
+    // always false (for experimental function)
     if (kJudgeFrameshift_) {
       Info->SetHasFrameshift();
     }
   }
 }
 
+// calculate score for each ref ID to sort ref IDs by it
 void Fuga::SetRefScore() {
+  // for each ref ID
   for (auto i = RefInfoM_.begin(); i != RefInfoM_.end(); ++i) {
     string Id(i->first);
     RefInfo* Info(&i->second);
+    // calculate and store score (identity * coverage)
     RefScore_[Info->Iden() * Info->Cov()].emplace_back(Id);
   }
 }
 
+// print identity and coverage for each ref ID
 void Fuga::PrintHit() {
   for (auto i = RefScore_.begin(); i != RefScore_.end(); ++i) {
     const vector<string>& IdV(i->second);

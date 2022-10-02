@@ -1,5 +1,6 @@
 # include "lib.h"
 
+// read and parse a line in SAM
 void SamL::ReadL(const string& L, const vector<string>& LSp) {
   Flag_ = stoul(LSp.at(1));
   ParseFlag();
@@ -71,8 +72,9 @@ void SamL::ParseTag(const string& L, const vector<string>& LSp) {
   As_ = stoul(LSp.at(13).substr(5));
 }
 
+// scan a mapped read from left to right
+// link each read pos to aligned ref pos
 void SamL::EditReadInfo(vector<ReadPosInfo>* ReadInfo) const {
-  // readをmappingされた状態で見て左から右へなめていく
   u32 ReadPos(0);
   if (ReadIsRC_) {
     ReadPos = ReadLen_ - 1;
@@ -106,6 +108,7 @@ void SamL::EditReadInfo(vector<ReadPosInfo>* ReadInfo) const {
   }
 }
 
+// move current read pos considering the strand of the read
 void SamL::MoveReadPos(u32* ReadPos) const {
   if (ReadIsRC_) {
     --(*ReadPos);
@@ -114,6 +117,7 @@ void SamL::MoveReadPos(u32* ReadPos) const {
   }
 }
 
+// called when a new hit with higher identity was found
 void ReadPosInfo::InitTopHitInfo(u32 As, double Iden, const string& RefId) {
   RefMatch_.clear();
   RefDel_.clear();
@@ -122,10 +126,13 @@ void ReadPosInfo::InitTopHitInfo(u32 As, double Iden, const string& RefId) {
   Iden_ = Iden;
 }
 
-// 各refへのtop hit readを出力したい場合用
-// void ReadPosInfo::EditRefInfoM(unordered_map<string, RefInfo>* RefInfoM, const string& ReadId) {
+// edit info of ref pos corresponding to the read pos
+// ex) identity of the alignment, coverage depth
+// functions are called for each alignment type, but nothing happens in
+// ParseRefDel() if the read pos does not support deletion of ref
 void ReadPosInfo::EditRefInfoM(unordered_map<string, RefInfo>* RefInfoM) {
   ParseRefMatch(RefInfoM);
+  // for experimental function
   ParseRefDel(RefInfoM);
   ParseRefIns(RefInfoM);
   ParseAllRefMatch(RefInfoM);
@@ -135,29 +142,26 @@ void ReadPosInfo::EditRefInfoM(unordered_map<string, RefInfo>* RefInfoM) {
 void ReadPosInfo::ParseRefMatch(unordered_map<string, RefInfo>* RefInfoM) {
   for (auto i = RefMatch_.begin(); i != RefMatch_.end(); ++i) {
     const string& Id(i->first);
-    // 各refへのtop hit readを出力したい場合用
-    // マッチなしのalignmentはありえないのでParseRefDel, ParseInsには不要
-    // RefInfoM->at(Id).EditTopHitReadId(ReadId);
     const unordered_set<u32>& Pos(i->second);
     for (auto j = Pos.begin(); j != Pos.end(); ++j) {
+      // append identity of the alignment (averaged afterwards)
       RefInfoM->at(Id).EditPosIden(*j, Iden_);
       RefInfoM->at(Id).EditPosDp(*j);
     }
   }
 }
 
+// for experimental function
 void ReadPosInfo::ParseRefDel(unordered_map<string, RefInfo>* RefInfoM) {
   for (auto i = RefDel_.begin(); i != RefDel_.end(); ++i) {
     const string& Id(i->first);
-    // 各refへのtop hit readを出力したい場合用
-    // RefInfoM->at(Id).EditTopHitReadId(ReadId);
     const unordered_map<u32, u32>& Del(i->second);
     for (auto j = Del.begin(); j != Del.end(); ++j) {
       u32 Pos(j->first);
       u32 Len(j->second);
       RefInfoM->at(Id).EditPosDel(Pos, Len);
-      // 編集するref posのRefPosInfo objectはRefMatch_, RefIns_を介しても編集する
-      // ためEditPosIden(), EditPosIns()は不要
+      // EditPosIden() and EditPosDp() are not required here, because they are
+      // called in ParseRefMatch() for this Pos
     }
   }
 }
@@ -165,10 +169,9 @@ void ReadPosInfo::ParseRefDel(unordered_map<string, RefInfo>* RefInfoM) {
 void ReadPosInfo::ParseRefIns(unordered_map<string, RefInfo>* RefInfoM) {
   for (auto i = RefIns_.begin(); i != RefIns_.end(); ++i) {
     const string& Id(i->first);
-    // 各refへのtop hit readを出力したい場合用
-    // RefInfoM->at(Id).EditTopHitReadId(ReadId);
     const unordered_set<u32>& Pos(i->second);
     for (auto j = Pos.begin(); j != Pos.end(); ++j) {
+      // append identity of the alignment (averaged afterwards)
       RefInfoM->at(Id).EditPosIden(*j, Iden_);
       RefInfoM->at(Id).EditPosDp(*j);
       RefInfoM->at(Id).EditPosIns(*j);
@@ -203,11 +206,12 @@ void RefInfo::Resize(u32 SeqLen) {
   }
 }
 
+// calculate average identity and coverage
 void RefInfo::SummarizeInfo() {
   double IdenSum(0);
-  // top hitによりカバーされているposの数
+  // number of positions covered by top hit reads
   u32 CoveredPosNum(0);
-  // 全hitによりカバーされているposの数
+  // number of positions covered by all hit reads
   u32 AllCoveredPosNum(0);
   u32 DpSum(0);
   for (auto i = PosInfo_.begin(); i != PosInfo_.end(); ++i) {
@@ -232,13 +236,14 @@ void RefInfo::SummarizeInfo() {
   }
 }
 
+// never called (experimental function)
 void RefInfo::SetHasFrameshift() {
   if (HasShortDelFrameshift() || HasShortInsFrameshift()) {
-      // HasLongInsFrameshift()) {
     HasFrameshift_ = true;
   }
 }
 
+// never called (experimental function)
 bool RefInfo::HasShortDelFrameshift() {
   for (auto i = PosInfo_.begin(); i != PosInfo_.end(); ++i) {
     u32 Dp(i->Dp());
@@ -258,6 +263,7 @@ bool RefInfo::HasShortDelFrameshift() {
   return false;
 }
 
+// never called (experimental function)
 bool RefInfo::HasShortInsFrameshift() {
   u32 InsBeg(0);
   u32 ContinuousIns(0);
@@ -284,6 +290,7 @@ bool RefInfo::HasShortInsFrameshift() {
   return false;
 }
 
+// never called (experimental function)
 bool RefInfo::HasLongInsFrameshift() {
   u32 InsBeg(0);
   u32 ContinuousDp0(0);

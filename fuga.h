@@ -24,14 +24,17 @@ class Fuga {
   void SummarizeRefInfo();
   void SetRefScore();
   void PrintHit();
-  // {read ID, R1 readの全alignmentのvector}
+  // {read ID: vector<each alignment info of the read>}
   unordered_map<string, vector<SamL> > R1Sam_;
-  // {read ID, R2 readの全alignmentのvector}
+  // {read ID: vector<each alignment info of the read>}
   unordered_map<string, vector<SamL> > R2Sam_;
   // {ref ID, RefInfo}
   unordered_map<string, RefInfo> RefInfoM_;
-  // {readがtop hitした領域の平均iden * readがtop hitした領域の割合, [ref ID]}
-  // iden * covが大きい順にref IDをソートするための変数
+  // {identity * coverage: vector<ref ID>}
+  // identity: average identity in region covered by top hit reads
+  // coverage: ratio of region covered by top hit reads
+  // variable to sort ref IDs by identity * coverage
+  // use score as key to sort ref IDs by it
   map<double, vector<string>, greater<double> > RefScore_;
 };
 
