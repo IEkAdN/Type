@@ -1,8 +1,8 @@
 #ifndef FUGA_H_
 #define FUGA_H_
 
-#include "hoge.h"
-#include "lib.h"
+#include "split.h"
+#include "alignment.h"
 
 class Fuga {
  public:

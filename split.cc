@@ -1,4 +1,4 @@
-#include "hoge.h"
+#include "split.h"
 
 void split(vector<string>& s_sp, const string& s, const string& delim,
            bool token_compress) {

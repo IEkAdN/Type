@@ -1,7 +1,7 @@
 #ifndef LIB_H_
 #define LIB_H_
 
-#include "hoge.h"
+#include "split.h"
 
 // each ref pos has one RefPosInfo object
 class RefPosInfo {

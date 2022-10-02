@@ -1,4 +1,4 @@
-# include "lib.h"
+# include "alignment.h"
 
 // read and parse a line in SAM
 void SamL::ReadL(const string& L, const vector<string>& LSp) {

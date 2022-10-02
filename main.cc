@@ -1,4 +1,4 @@
-#include "fuga.h"
+#include "type.h"
 
 int main(int argc, const char* argv[]) {
   if (argc != 4) {

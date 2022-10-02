@@ -1,4 +1,4 @@
-#include "fuga.h"
+#include "type.h"
 
 void Fuga::Main() {
   ReadRef();
