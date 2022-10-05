@@ -24,7 +24,7 @@ class RefPosInfo {
 
  private:
   // vector<identity b/w the pos and each top hit read>
-  // appended even if the read supports ref deletion at the pos
+  // appended even if the read supports ref insertion at the pos
   vector<double> Iden_;
   double AvgIden_;
   // number of top hit reads supporting ref insertion
@@ -34,7 +34,7 @@ class RefPosInfo {
   // for experimental function
   unordered_map<u32, u32> Del_;
   // coverage depth of top hit reads
-  // counted up even if a read supports ref deletion at the pos
+  // counted up even if a read supports ref insertion at the pos
   u32 Dp_;
   // coverage depth of all hit reads
   u32 AllDp_;
@@ -116,8 +116,7 @@ class ReadPosInfo {
   // top hits are judged based on BWA's AS tag
   // sometimes there are multiple top hits for one read pos
   // AllRefMatch_, AllRefIns_ are set considering all hits
-  // these variables stores corresponding ref pos, because they are set to edit
-  // Type::RefInfoM_
+  // these variables stores corresponding ref pos to edit Type::RefInfoM_
 
   // {top hit ref ID: set<top hit ref pos>}
   unordered_map<string, unordered_set<u32> > RefMatch_;

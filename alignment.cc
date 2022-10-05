@@ -128,8 +128,8 @@ void ReadPosInfo::InitTopHitInfo(u32 As, double Iden, const string& RefId) {
 
 // edit info of ref pos corresponding to the read pos
 // ex) identity of the alignment, coverage depth
-// functions are called for each alignment type, but nothing happens in
-// ParseRefDel() if the read pos does not support deletion of ref
+// functions are called for each alignment type, but for example, nothing
+// happens in ParseRefDel() if the read pos does not support deletion of ref
 void ReadPosInfo::EditRefInfoM(unordered_map<string, RefInfo>* RefInfoM) {
   ParseRefMatch(RefInfoM);
   // for experimental function
@@ -160,8 +160,6 @@ void ReadPosInfo::ParseRefDel(unordered_map<string, RefInfo>* RefInfoM) {
       u32 Pos(j->first);
       u32 Len(j->second);
       RefInfoM->at(Id).EditPosDel(Pos, Len);
-      // EditPosIden() and EditPosDp() are not required here, because they are
-      // called in ParseRefMatch() for this Pos
     }
   }
 }
@@ -253,7 +251,7 @@ bool RefInfo::HasShortDelFrameshift() {
       u32 ReadNum(j->second);
       if (Len % 3 != 0 && double(ReadNum) / Dp >= kIndelRate_) {
         u32 Pos(i->Pos());
-        // read側の挿入
+        // insertion of read
         Frameshift_ = to_string((long long int) Len) + " bp insertion between " +
                       to_string((long long int) Pos + 1) + " and " + to_string((long long int) Pos + 2);
         return true;
@@ -279,7 +277,7 @@ bool RefInfo::HasShortInsFrameshift() {
     } else {
       if (ContinuousIns % 3 != 0) {
         u32 InsEnd(Pos);
-        // read側の欠失
+        // deletion of read
         Frameshift_ = "deletion [" + to_string((long long int) InsBeg + 1) + "," +
                       to_string((long long int) InsEnd) + "]";
         return true;
@@ -305,7 +303,7 @@ bool RefInfo::HasLongInsFrameshift() {
     } else {
       if (ContinuousDp0 % 3 != 0) {
         u32 InsEnd(Pos);
-        // read側の欠失
+        // deletion of read
         Frameshift_ = "deletion [" + to_string((long long int) InsBeg + 1) + "," +
                       to_string((long long int) InsEnd) + "]";
         return true;

@@ -53,20 +53,21 @@ void Type::ReadSam(string FNom, unordered_map<string, vector<SamL> >* Sam) {
   }
 }
 
-// link ref pos and mapped read pos
+// edit object storing ref info
+// ex) identity of alignment to each read, coverage depth
 void Type::EditRefInfoM(unordered_map<string, vector<SamL> >* Sam) {
-  // for each read ID
+  // for each read ID i
   for (auto i = Sam->begin(); i != Sam->end(); ++i) {
     const vector<SamL>& SamLV(i->second);
     u32 ReadLen(SamLV.begin()->ReadLen());
     vector<ReadPosInfo> ReadInfo(ReadLen);
-    // for each alignment
+    // for each alignment j of read ID i
     for (auto j = SamLV.begin(); j != SamLV.end(); ++j) {
       // edit info of each read position
       // ex) corresponding ref position
       j->EditReadInfo(&ReadInfo);
     }
-    // for each read pos j
+    // for each read pos j of read ID i
     for (auto j = ReadInfo.begin(); j != ReadInfo.end(); ++j) {
       // edit info of each ref position corresponding to j
       // ex) identity of the alignment, coverage depth

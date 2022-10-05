@@ -28,7 +28,7 @@ class Type {
   unordered_map<string, vector<SamL> > R1Sam_;
   // {read ID: vector<each alignment info of the read>}
   unordered_map<string, vector<SamL> > R2Sam_;
-  // {ref ID, RefInfo}
+  // {ref ID: RefInfo}
   unordered_map<string, RefInfo> RefInfoM_;
   // {identity * coverage: vector<ref ID>}
   // identity: average identity in region covered by top hit reads
