@@ -1,6 +1,6 @@
 # Type
 ## Usage
-In order to run Type, execute the following command:  
+In order to run `Type`, execute the following command:  
 
 ```
 Type [R1.sam] [R2.sam] [reference.fasta]
@@ -35,3 +35,8 @@ git clone https://github.com/IEkAdN/Type.git
 cd Type/
 make
 ```
+
+## Publication
+This program was used in the following paper:  
+Miyata, Tatsuya, et al. "Alteration of a Shiga toxin-encoding phage associated with a change in toxin production level and disease severity in Escherichia coli." Microbial Genomics 9.2 (2023).  
+[https://doi.org/10.1099/mgen.0.000935](https://doi.org/10.1099/mgen.0.000935)
